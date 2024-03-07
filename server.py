@@ -15,7 +15,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def url_mapping_response(self):
         for pattern, method in mappings:
             match = self.get_params(pattern, self.path)
-            if match:
+            if match is not None:
                 md = getattr(self, method)
                 md(**match)
                 return
@@ -36,7 +36,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html")
         self.end_headers()
         # book_info = f"<h1> Info de libro {book_id} es correcto </h1>".encode("utf-8")
-        book_info = r.get(f"book:{book_id}")or "No existe el libro".encode("utf-8")
+        book_info = r.get(f"book: {book_id}") or "No existe el libro".encode("utf-8")
         self.wfile.write(book_info)
  
     def index(self):
