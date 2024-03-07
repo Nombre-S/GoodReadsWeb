@@ -1,6 +1,8 @@
 # GoodReadsWeb
 Primer proyecto de la clase de Programación Web.
+
 Semestre Febrero - Junio 2024
+
 Soto García Alejandro - 20212433
 
 ## Requisitos
