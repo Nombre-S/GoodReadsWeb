@@ -60,11 +60,11 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.write_session_cookie(session_id)
         self.end_headers()
         book_info = r.get(f"book: {book_id}") or "<h1> No existe el libro </h1>".encode("utf-8")
-        self.wfile.write(str(book_info).encode("utf-8"))
+        self.wfile.write(book_info)
         self.wfile.write(f"session: {session_id}".encode("utf-8"))
         book_list = r.lrange(f"session: {session_id}", 0, 1)
         for book in book_list:
-            self.wfile.write(f"book: {book}".encode("utf-8"))
+            self.wfile.write(f" book: {book}".encode("utf-8"))
     
    
     def index(self):
