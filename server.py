@@ -26,7 +26,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
-        index_page = f"<h1> {self.query_data} </h1>".encode("utf-8")
+        index_page = f"<h1> {self.query_data['q'].split()} </h1>".encode("utf-8")
         self.wfile.write(index_page)
 
     def cookies(self):
