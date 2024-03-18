@@ -96,7 +96,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         <ul>
         """
         
-        if isinstance(book_recommendation[0], bytes):
+        if book_recommendation[0] == b"Ya haz visitado todos los libros":
             response += f"<li>{book_recommendation[0].decode()}</li>"
         else:
             response += f"<li>{book_recommendation[0]}</li>"
