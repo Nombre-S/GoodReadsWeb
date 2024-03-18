@@ -7,9 +7,16 @@
         <link href="css/style.css" rel="stylesheet">
     </head>
     <body>
-    <h1>La Biblioteca</h1>       
-    
-    <article>
+        <h1> Bienvenidos a los libros </h1>
+        <form action="/search" method="GET">
+            <label for="q">Search</label>
+            <input type="text" name="q"/>
+            <input type="submit" value="Buscar Libros"/>
+        </form>
+
+        <h1>La Biblioteca</h1>       
+
+        <article>
             <h2><a href="\books\book1.html"> C# avanzado </a></h2>
             <p> Pedro López, Juan Ruiz </p>
             <br> 
@@ -21,6 +28,8 @@
             <br> 
             <h2><a href="\books\book4.html"> La Danza de Hielo y Fuego </a></h2>
             <p> R.R. González </p>
-    </article>
+        </article>
+
     </body>
 </html>
+
