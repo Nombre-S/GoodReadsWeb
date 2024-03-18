@@ -54,7 +54,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def write_session_cookie(self, session_id):
         cookies = SimpleCookie()
         cookies["session_id"] = session_id
-        cookies["session_id"]["max-age"] = 1000
+        cookies["session_id"]["max-age"] = 10
         self.send_header("Set-Cookie", cookies.output(header=""))
 
     def do_GET(self):
