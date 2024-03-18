@@ -23,11 +23,20 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         return dict(parse_qsl(self.url.query))
 
     def search(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html")
+        query_key = self.query_data.get('q')
+        if query_key:
+            html_content = r.get(query_key)
+            if html_content:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.end_headers()
+                self.wfile.write(html_content)
+                return
+
+        self.send_response(404)
         self.end_headers()
-        index_page = f"<h1> {self.query_data['q'].split()} </h1>".encode("utf-8")
-        self.wfile.write(index_page)
+        error_message = "<h1>La clave no existe o no se proporcionó.</h1>"
+        self.wfile.write(error_message.encode("utf-8"))
 
     def cookies(self):
         return SimpleCookie(self.headers.get("Cookie"))
