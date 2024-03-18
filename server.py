@@ -69,7 +69,6 @@ class WebRequestHandler(BaseHTTPRequestHandler):
                 return
 
         self.send_response(404)
-        # self.send_header("Content-Type", "text/html")
         self.end_headers()
         error = f"<h1> Not found </h1>".encode("utf-8")
         self.wfile.write(error)
@@ -81,39 +80,37 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
     def get_books(self, book_id):
         session_id = self.get_session()
-        #r.lpush(f"session: {session_id}", f"book: {book_id}")
         book_recommendation = self.get_book_recommendation( str(session_id), book_id)
+        
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.write_session_cookie(session_id)
         self.end_headers()
+        
         book_info = r.get(f"book: {book_id}") or "<h1> No existe el libro </h1>".encode("utf-8")
         self.wfile.write(book_info)
+        
         response = f"""
         <p> SESSION: {session_id} </p>
         <p> Recomendación: </p>
         <ul>
         """
-        if book_recommendation[0] == b"Ya haz visitado todos los libros":
+        
+        if isinstance(book_recommendation[0], bytes):
             response += f"<li>{book_recommendation[0].decode()}</li>"
         else:
-            for recommendation in book_recommendation:
-                response += f"<li>{recommendation}</li>"
+            response += f"<li>{book_recommendation[0]}</li>"
         response += "</ul>"
         self.wfile.write(response.encode("utf-8"))        
-        #self.wfile.write(f"session: {session_id}".encode("utf-8"))
-        #book_list = r.lrange(f"session: {session_id}", 0, 1)
-        #for book in book_list:
-         #   self.wfile.write(f" book: {book}".encode("utf-8"))
-    
+            
     def get_book_recommendation(self, session_id, book_id):
         r.rpush(session_id, book_id)
         books = r.lrange(session_id, 0, 10)
         print(session_id, books)
 
-        all_books = [str(i+1) for i in range(10)]
+        all_books = [ i+1 for i in range(10) ]
         new = [b for b in all_books if b not in
-               [vb.decode() for vb in books]]
+               [int(vb.decode()) for vb in books]]
 
         if len(new) != 0:
             if len(new) < 3:
