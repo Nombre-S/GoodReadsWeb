@@ -96,10 +96,12 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         <ul>
         """
         
-        if book_recommendation[0] == b"Ya haz visitado todos los libros":
-            response += f"<li>{book_recommendation[0].decode()}</li>"
+        if isinstance(book_recommendation, list):
+            for recommendation in book_recommendation:
+                response += f"<li><a href='/books/{recommendation}'> Visita el libro: {recommendation}</a></li>"
         else:
-            response += f"<li>{book_recommendation[0]}</li>"
+            response += f"<li><a href='/'>{book_recommendation} vuelve al menú</a></li>"
+        
         response += "</ul>"
         self.wfile.write(response.encode("utf-8"))        
             
@@ -113,11 +115,11 @@ class WebRequestHandler(BaseHTTPRequestHandler):
                [int(vb.decode()) for vb in books]]
 
         if len(new) != 0:
-            if len(new) < 3:
+            if len(new) < 1:
                 return new[0]
             return new[:1]
         else:
-            return [b"Ya haz visitado todos los libros"]
+            return "Ya has visitado todos los libros"
 
     def index(self):
         self.send_response(200)
