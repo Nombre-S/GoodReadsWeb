@@ -54,7 +54,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def write_session_cookie(self, session_id):
         cookies = SimpleCookie()
         cookies["session_id"] = session_id
-        cookies["session_id"]["max-age"] = 10
+        cookies["session_id"]["max-age"] = 100
         self.send_header("Set-Cookie", cookies.output(header=""))
 
     def do_GET(self):
@@ -82,14 +82,18 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def get_books(self, book_id):
         session_id = self.get_session()
         #r.lpush(f"session: {session_id}", f"book: {book_id}")
-        book_recommendation = get_book_recommendation(session_id, book_id)
+        book_recommendation = self.get_book_recommendation( str(session_id), book_id)
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.write_session_cookie(session_id)
         self.end_headers()
         book_info = r.get(f"book: {book_id}") or "<h1> No existe el libro </h1>".encode("utf-8")
         self.wfile.write(book_info)
-        self.wfile.write(book_recommendation)
+        response = f"""
+        <p> SESSION: {session_id} </p>
+        <p> Recomendación: {book_recommendation} </p>
+        """
+        self.wfile.write(response.encode("utf-8"))
         #self.wfile.write(f"session: {session_id}".encode("utf-8"))
         #book_list = r.lrange(f"session: {session_id}", 0, 1)
         #for book in book_list:
@@ -107,9 +111,9 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         if len(new) != 0:
             if len(new) < 3:
                 return new[0]
-            return "Lea 3 libros para recibir recomendaciones"
+            return b"Lea 3 libros para recibir recomendaciones"
         else:
-            return "No hay mas recomendaciones"
+            return b"No hay mas recomendaciones"
 
     def index(self):
         self.send_response(200)
