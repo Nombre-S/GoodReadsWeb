@@ -36,7 +36,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
         self.send_response(404)
         self.end_headers()
-        error_message = "<h1>La clave no existe o no se proporcionó.</h1>"
+        error_message = "<h1>No se han encontrado coincidencias</h1>"
         self.wfile.write(error_message.encode("utf-8"))
 
     def cookies(self):
@@ -81,19 +81,36 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
     def get_books(self, book_id):
         session_id = self.get_session()
-        r.lpush(f"session: {session_id}", f"book: {book_id}")
+        #r.lpush(f"session: {session_id}", f"book: {book_id}")
+        book_recommendation = get_book_recommendation(session_id, book_id)
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.write_session_cookie(session_id)
         self.end_headers()
         book_info = r.get(f"book: {book_id}") or "<h1> No existe el libro </h1>".encode("utf-8")
         self.wfile.write(book_info)
-        self.wfile.write(f"session: {session_id}".encode("utf-8"))
-        book_list = r.lrange(f"session: {session_id}", 0, 1)
-        for book in book_list:
-            self.wfile.write(f" book: {book}".encode("utf-8"))
+        self.wfile.write(book_recommendation)
+        #self.wfile.write(f"session: {session_id}".encode("utf-8"))
+        #book_list = r.lrange(f"session: {session_id}", 0, 1)
+        #for book in book_list:
+         #   self.wfile.write(f" book: {book}".encode("utf-8"))
     
-   
+    def get_book_recommendation(self, session_id, book_id):
+        r.rpush(session_id, book_id)
+        books = r.lrange(session_id, 0, 10)
+        print(session_id, books)
+
+        all_books = [str(i+1) for i in range(10)]
+        new = [b for b in all_books if b not in
+               [vb.decode() for vb in books]]
+
+        if len(new) != 0:
+            if len(new) < 3:
+                return new[0]
+            return "Lea 3 libros para recibir recomendaciones"
+        else:
+            return "No hay mas recomendaciones"
+
     def index(self):
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
