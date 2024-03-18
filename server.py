@@ -5,10 +5,11 @@ from http.cookies import SimpleCookie
 import uuid
 from urllib.parse import parse_qsl, urlparse
 
-mappings = {(r"^/books/(?P<book_id>\d+)$", "get_books"),
-            (r"^/books/(?P<book_id>\d+)$", "get_books"),
-            (r"^/$", "index"),
-            (r"^/search", "search")}
+mappings = {
+        (r"^/books/(?P<book_id>\d+)$", "get_books"),
+        (r"^/$", "index"),
+        (r"^/search", "search")
+        }
 
 r = redis.StrictRedis(host="localhost", port=6379, db=0)
 
@@ -97,15 +98,9 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
-        index_page = """
-        <h1> Bienvenidos a los libros </h1>
-        <form action="/search" method="GET">
-            <label for="q">Search</label>
-            <input type="text" name="q"/>
-            <input type="submit" value="Buscar Libros"/>
-        </form>
-        """.encode("utf-8")
-        self.wfile.write(index_page)
+        with open('html/index.html') as f:
+            response = f.read()
+        self.wfile.write(response.encode("utf-8"))
 
 if __name__ == "__main__":
     print("Server starting...")
