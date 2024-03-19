@@ -4,6 +4,7 @@ import redis
 from http.cookies import SimpleCookie
 import uuid
 from urllib.parse import parse_qsl, urlparse
+from bs4 import BeautifulSoup
 
 mappings = {
         (r"^/books/(?P<book_id>\d+)$", "get_books"),
@@ -26,18 +27,46 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def search(self):
         query_key = self.query_data.get('q')
         if query_key:
-            html_content = r.get(query_key)
-            if html_content:
+            # Realizar búsqueda en Redis
+            matching_books = r.smembers(query_key)
+            if matching_books:
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html")
                 self.end_headers()
-                self.wfile.write(html_content)
+                # Mostrar el formulario de búsqueda en la parte superior
+                response = b"""
+                    <form action="/search" method="GET">
+                        <label for="q">Search</label>
+                        <input type="text" name="q"/>
+                        <input type="submit" value="Buscar Libros"/>
+                    </form>
+                    <h1>Resultados de la busqueda:</h1>
+                    <ul>
+                """
+                for book_id in matching_books:
+                    book_info = r.get(f"book: {book_id.decode()}")
+                    if book_info:
+                        soup = BeautifulSoup(book_info, 'html.parser')
+                        title = soup.find('h2').text
+                        response += f"<li><a href='/books/{book_id.decode()}'>{title}</a></li>".encode()
+                response += b"</ul>"
+                self.wfile.write(response)
                 return
 
+        # Si no se encuentran coincidencias
         self.send_response(404)
+        self.send_header("Content-Type", "text/html")
         self.end_headers()
-        error_message = "<h1>No se han encontrado coincidencias</h1>"
-        self.wfile.write(error_message.encode("utf-8"))
+        # Mostrar el formulario de búsqueda en la parte superior
+        error_message = f"""
+        <form action="/search" method="GET">
+            <label for="q">Search</label>
+            <input type="text" name="q" value="{query_key}"/> <!-- Mostrar el término buscado -->
+            <input type="submit" value="Buscar Libros"/>
+        </form>
+        <h1>No se han encontrado coincidencias para '{query_key}'</h1>
+        """.encode()
+        self.wfile.write(error_message)
 
     def cookies(self):
         return SimpleCookie(self.headers.get("Cookie"))
