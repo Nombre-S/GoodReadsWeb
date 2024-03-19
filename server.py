@@ -117,7 +117,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         
         book_info = r.get(f"book: {book_id}") or "<h1> No existe el libro </h1>".encode("utf-8")
-        self.wfile.write(book_info)
+        self.wfile.write(book_info)  
         
         response = f"""
         <p> SESSION: {session_id} </p>
