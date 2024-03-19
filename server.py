@@ -127,7 +127,10 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         
         if isinstance(book_recommendation, list):
             for recommendation in book_recommendation:
-                response += f"<li><a href='/books/{recommendation}'> Visita el libro: {recommendation}</a></li>"
+                book_info = r.get(f"book: {recommendation}") 
+                soup = BeautifulSoup(book_info, 'html.parser')
+                title = soup.find('h2').text
+                response += f"<li><a href='/books/{recommendation}'> Visita el libro: {title}</a></li>"
         else:
             response += f"<li><a href='/'>{book_recommendation} vuelve al menú</a></li>"
         
